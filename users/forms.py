@@ -1,10 +1,10 @@
 import re
-from urllib.parse import urlparse
 
 from django import forms
 from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.password_validation import validate_password
+
+from team_finder.constants import PHONE_DIGITS_COUNT
 
 
 User = get_user_model()
@@ -16,17 +16,6 @@ class RegisterForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ("name", "surname", "email", "password")
-        labels = {
-            "name": "Имя",
-            "surname": "Фамилия",
-            "email": "Email",
-        }
-
-    def clean_email(self):
-        email = self.cleaned_data["email"].lower()
-        if User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("Пользователь с таким email уже существует.")
-        return email
 
     def clean_password(self):
         password = self.cleaned_data["password"]
@@ -35,6 +24,7 @@ class RegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+        user.email = User.objects.normalize_email(self.cleaned_data["email"]).lower()
         user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
@@ -72,18 +62,6 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ("name", "surname", "avatar", "about", "phone", "github_url")
-        labels = {
-            "name": "Имя",
-            "surname": "Фамилия",
-            "avatar": "Аватар",
-            "about": "О себе",
-            "phone": "Телефон",
-            "github_url": "GitHub",
-        }
-        widgets = {
-            "avatar": forms.FileInput(attrs={"style": "display: none;"}),
-            "about": forms.Textarea(attrs={"rows": 4}),
-        }
 
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
@@ -94,7 +72,7 @@ class ProfileForm(forms.ModelForm):
         if phone.startswith("8"):
             phone = "+7" + phone[1:]
 
-        if not re.fullmatch(r"\+7\d{10}", phone):
+        if not re.fullmatch(rf"\+7\d{{{PHONE_DIGITS_COUNT}}}", phone):
             raise forms.ValidationError("Введите телефон в формате 8XXXXXXXXXX или +7XXXXXXXXXX.")
 
         users = User.objects.filter(phone=phone)
@@ -104,17 +82,3 @@ class ProfileForm(forms.ModelForm):
             raise forms.ValidationError("Этот телефон уже указан у другого пользователя.")
 
         return phone
-
-    def clean_github_url(self):
-        url = self.cleaned_data.get("github_url")
-        if not url:
-            return url
-
-        host = urlparse(url).netloc.lower().removeprefix("www.")
-        if host != "github.com" and not host.endswith(".github.com"):
-            raise forms.ValidationError("Ссылка должна вести на GitHub.")
-        return url
-
-
-class UserPasswordChangeForm(PasswordChangeForm):
-    pass

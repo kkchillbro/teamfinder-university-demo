@@ -13,8 +13,14 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Личная информация", {"fields": ("name", "surname", "avatar", "about", "phone", "github_url")}),
-        ("Права", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        (
+            "Личная информация",
+            {"fields": ("name", "surname", "avatar", "about", "phone", "github_url")},
+        ),
+        (
+            "Права",
+            {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+        ),
         ("Даты", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
@@ -22,7 +28,15 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "name", "surname", "password1", "password2", "is_staff", "is_active"),
+                "fields": (
+                    "email",
+                    "name",
+                    "surname",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_active",
+                ),
             },
         ),
     )

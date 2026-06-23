@@ -28,8 +28,6 @@ services:
         value: "3600"
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://*.onrender.com"
-      - key: TASK_VERSION
-        value: "3"
       - key: SERVE_MEDIA_FILES
         value: "True"
       - key: PYTHON_VERSION
