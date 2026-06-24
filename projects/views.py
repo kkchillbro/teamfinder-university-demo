@@ -8,7 +8,6 @@ from django.views.decorators.http import require_GET, require_POST
 
 from team_finder.constants import SKILL_NAME_MAX_LENGTH, SKILLS_SUGGEST_LIMIT
 from team_finder.pagination import get_page_obj
-
 from .forms import ProjectForm
 from .models import Project, Skill
 
@@ -45,14 +44,7 @@ def project_detail(request, project_pk):
 
 @login_required
 def create_project(request):
-    if request.method != "POST":
-        return render(
-            request,
-            "projects/create-project.html",
-            {"form": ProjectForm(), "is_edit": False},
-        )
-
-    form = ProjectForm(request.POST)
+    form = ProjectForm(request.POST or None)
     if not form.is_valid():
         return render(request, "projects/create-project.html", {"form": form, "is_edit": False})
 
@@ -69,14 +61,7 @@ def edit_project(request, project_pk):
     if project.owner != request.user:
         return HttpResponseForbidden("Редактировать проект может только автор.")
 
-    if request.method != "POST":
-        return render(
-            request,
-            "projects/create-project.html",
-            {"form": ProjectForm(instance=project), "is_edit": True},
-        )
-
-    form = ProjectForm(request.POST, instance=project)
+    form = ProjectForm(request.POST or None, instance=project)
     if not form.is_valid():
         return render(request, "projects/create-project.html", {"form": form, "is_edit": True})
 

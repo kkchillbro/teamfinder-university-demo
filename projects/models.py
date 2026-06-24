@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 
 from team_finder.constants import PROJECT_NAME_MAX_LENGTH, SKILL_NAME_MAX_LENGTH
@@ -14,9 +13,6 @@ class Skill(models.Model):
         ordering = ["name"]
         verbose_name = _("навык")
         verbose_name_plural = _("навыки")
-        constraints = [
-            models.UniqueConstraint(Lower("name"), name="unique_skill_name_case_insensitive"),
-        ]
 
     def __str__(self):
         return self.name
@@ -29,7 +25,6 @@ class Project(models.Model):
         (STATUS_OPEN, _("Открыт")),
         (STATUS_CLOSED, _("Закрыт")),
     ]
-    STATUS_MAX_LENGTH = max(len(status) for status, _ in STATUS_CHOICES)
 
     name = models.CharField(_("название"), max_length=PROJECT_NAME_MAX_LENGTH)
     description = models.TextField(_("описание"), blank=True)
@@ -47,7 +42,7 @@ class Project(models.Model):
     )
     status = models.CharField(
         _("статус"),
-        max_length=STATUS_MAX_LENGTH,
+        max_length=max(len(status) for status, _ in STATUS_CHOICES),
         choices=STATUS_CHOICES,
         default=STATUS_OPEN,
     )

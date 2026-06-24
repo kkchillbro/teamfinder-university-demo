@@ -4,7 +4,6 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import get_object_or_404, redirect, render
 
 from team_finder.pagination import get_page_obj
-
 from .forms import LoginForm, ProfileForm, RegisterForm
 
 
@@ -34,10 +33,7 @@ def register(request):
     if request.user.is_authenticated:
         return redirect("projects:list")
 
-    if request.method != "POST":
-        return render(request, "users/register.html", {"form": RegisterForm()})
-
-    form = RegisterForm(request.POST)
+    form = RegisterForm(request.POST or None)
     if not form.is_valid():
         return render(request, "users/register.html", {"form": form})
 
@@ -49,10 +45,7 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect("projects:list")
 
-    if request.method != "POST":
-        return render(request, "users/login.html", {"form": LoginForm(request)})
-
-    form = LoginForm(request, request.POST)
+    form = LoginForm(request, request.POST or None)
     if not form.is_valid():
         return render(request, "users/login.html", {"form": form})
 
@@ -67,14 +60,7 @@ def logout_view(request):
 
 @login_required
 def edit_profile(request):
-    if request.method != "POST":
-        return render(
-            request,
-            "users/edit_profile.html",
-            {"form": ProfileForm(instance=request.user)},
-        )
-
-    form = ProfileForm(request.POST, request.FILES, instance=request.user)
+    form = ProfileForm(request.POST or None, request.FILES or None, instance=request.user)
     if not form.is_valid():
         return render(request, "users/edit_profile.html", {"form": form})
 
@@ -84,14 +70,7 @@ def edit_profile(request):
 
 @login_required
 def change_password(request):
-    if request.method != "POST":
-        return render(
-            request,
-            "users/change_password.html",
-            {"form": PasswordChangeForm(request.user)},
-        )
-
-    form = PasswordChangeForm(request.user, request.POST)
+    form = PasswordChangeForm(request.user, request.POST or None)
     if not form.is_valid():
         return render(request, "users/change_password.html", {"form": form})
 
